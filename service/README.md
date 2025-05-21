@@ -1,6 +1,6 @@
 # JustPayd Service
 
-A microservice for managing employee shifts, assignments, and shift requests.
+A service for managing employee shifts, assignments, and shift requests.
 
 ## Features
 
@@ -66,6 +66,20 @@ A microservice for managing employee shifts, assignments, and shift requests.
    ```bash
    docker run -p 8080:8080 justpayd-service
    ```
+
+## Authentication
+
+The application uses JWT-based authentication with the following details:
+
+- Authentication header format: `Authorization: Bearer <token>`
+- Login mechanism: Email-only authentication (passwords are handled by SSO in the client application)
+- Available test accounts:
+  - Worker account: `pekerja@mail.com`
+  - Admin account: `admin@mail.com`
+
+## Existing Data
+
+The application comes pre-populated with test data including users, shifts, and assignments that you can use to explore the API functionality.
 
 ## API Endpoints
 
