@@ -32,7 +32,22 @@ func NewShiftRequestService(
 }
 
 func (s *shiftRequestService) CreateShiftRequest(ctx context.Context, userID int, shiftID int, req *CreateShiftRequestDTO) (*ShiftRequestResponse, error) {
-	// Add validation or business logic here if needed
+	// Check if this user has already requested this shift
+	filter := &ShiftRequestFilter{
+		ShiftID: shiftID,
+	}
+
+	existingRequests, err := s.shiftRequestRepository.GetShiftRequests(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check existing shift requests: %w", err)
+	}
+
+	// If this user has already requested this shift, don't create a new one
+	if len(existingRequests) > 0 {
+		return nil, fmt.Errorf("someone else have already requested this shift")
+	}
+
+	// If no existing requests from this user, proceed with creating a new request
 	return s.shiftRequestRepository.CreateShiftRequest(ctx, userID, shiftID, req)
 }
 

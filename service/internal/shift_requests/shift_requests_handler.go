@@ -66,7 +66,7 @@ func (h *ShiftRequestHandler) CreateShiftRequest(w http.ResponseWriter, r *http.
 	request, err := h.ShiftRequestService.CreateShiftRequest(r.Context(), userID, payload.ShiftID, &payload)
 	if err != nil {
 		h.logger.Errorf("Error creating shift request: %v", err)
-		pkg.WriteJSON(w, http.StatusInternalServerError, pkg.NewErrorResponse("Failed to create shift request"))
+		pkg.WriteJSON(w, http.StatusInternalServerError, pkg.NewErrorResponse(err.Error()))
 		return
 	}
 	pkg.WriteJSON(w, http.StatusCreated, pkg.SuccessResponse(request))
