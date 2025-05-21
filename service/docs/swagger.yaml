@@ -1,0 +1,685 @@
+basePath: /api
+definitions:
+  assignments.AssignmentResponse:
+    properties:
+      assigned_at:
+        type: string
+      date:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: integer
+      shift_id:
+        type: integer
+      start_time:
+        type: string
+      user_id:
+        type: integer
+      user_name:
+        type: string
+    type: object
+  assignments.CreateAssignmentRequest:
+    properties:
+      shift_id:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - shift_id
+    - user_id
+    type: object
+  assignments.UpdateAssignmentRequest:
+    properties:
+      user_id:
+        type: integer
+    required:
+    - user_id
+    type: object
+  auth.LoginRequest:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+    type: object
+  auth.LoginResponse:
+    properties:
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      user_id:
+        example: 1
+        type: integer
+    type: object
+  pkg.BaseResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  shift_requests.CreateShiftRequestDTO:
+    properties:
+      shift_id:
+        type: integer
+    required:
+    - shift_id
+    type: object
+  shift_requests.ShiftRequestResponse:
+    properties:
+      date:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: integer
+      requested_at:
+        type: string
+      shift_id:
+        type: integer
+      start_time:
+        type: string
+      status:
+        type: string
+      user_id:
+        type: integer
+      user_name:
+        type: string
+    type: object
+  shifts.CreateShiftRequest:
+    properties:
+      date:
+        type: string
+      end_time:
+        type: string
+      location:
+        type: string
+      role:
+        type: string
+      start_time:
+        type: string
+    required:
+    - date
+    - end_time
+    - role
+    - start_time
+    type: object
+  shifts.ShiftResponse:
+    properties:
+      assignee:
+        type: string
+      created_at:
+        type: string
+      date:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: integer
+      is_assigned:
+        type: boolean
+      location:
+        type: string
+      role:
+        type: string
+      start_time:
+        type: string
+    type: object
+  shifts.UpdateShiftRequest:
+    properties:
+      date:
+        type: string
+      end_time:
+        type: string
+      location:
+        type: string
+      role:
+        type: string
+      start_time:
+        type: string
+    type: object
+  users.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
+    required:
+    - email
+    - name
+    - role
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+    url: http://www.example.com/support
+  description: API for JustPayd services
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: JustPayd API
+  version: "1.0"
+paths:
+  /assignments:
+    get:
+      description: Get all shift assignments
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved assignments
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.BaseResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/assignments.AssignmentResponse'
+                  type: array
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: List all assignments
+      tags:
+      - assignments
+    post:
+      consumes:
+      - application/json
+      description: Assign a user to a shift
+      parameters:
+      - description: Assignment creation payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/assignments.CreateAssignmentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Assignment created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/assignments.AssignmentResponse'
+              type: object
+        "400":
+          description: Invalid request payload
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: Create a new assignment
+      tags:
+      - assignments
+  /assignments/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Change the user assigned to a shift
+      parameters:
+      - description: Assignment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Assignment update payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/assignments.UpdateAssignmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Assignment updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/assignments.AssignmentResponse'
+              type: object
+        "400":
+          description: Invalid request payload or assignment ID
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "404":
+          description: Assignment not found
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: Update assignment
+      tags:
+      - assignments
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns a JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully authenticated
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth.LoginResponse'
+              type: object
+        "400":
+          description: Invalid request format
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "500":
+          description: Authentication failed
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: User login
+      tags:
+      - auth
+  /shift_requests:
+    get:
+      description: Admin gets all shift requests, can filter by status, user_id, and
+        shift_id
+      parameters:
+      - description: Filter by status (pending, approved, rejected)
+        in: query
+        name: status
+        type: string
+      - description: Filter by user ID
+        in: query
+        name: user_id
+        type: integer
+      - description: Filter by shift ID
+        in: query
+        name: shift_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved shift requests
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.BaseResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/shift_requests.ShiftRequestResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "403":
+          description: Forbidden - Not an admin
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: List all shift requests
+      tags:
+      - shift-requests
+    post:
+      consumes:
+      - application/json
+      description: User with role "user" creates shift request
+      parameters:
+      - description: Shift request creation payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/shift_requests.CreateShiftRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Shift request created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/shift_requests.ShiftRequestResponse'
+              type: object
+        "400":
+          description: Invalid request payload
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: User creates shift request
+      tags:
+      - shift-requests
+  /shift_requests/approve/{id}:
+    put:
+      description: Admin approves shift request by ID
+      parameters:
+      - description: Shift Request ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Shift request approved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/shift_requests.ShiftRequestResponse'
+              type: object
+        "400":
+          description: Invalid request ID
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "403":
+          description: Forbidden - Not an admin
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "404":
+          description: Shift request not found
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: Admin approves shift request
+      tags:
+      - shift-requests
+  /shift_requests/reject/{id}:
+    put:
+      description: Admin rejects shift request by ID
+      parameters:
+      - description: Shift Request ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Shift request rejected successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/shift_requests.ShiftRequestResponse'
+              type: object
+        "400":
+          description: Invalid request ID
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "403":
+          description: Forbidden - Not an admin
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "404":
+          description: Shift request not found
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: Admin rejects shift request
+      tags:
+      - shift-requests
+  /shifts:
+    get:
+      description: List semua shift
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved shifts
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.BaseResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/shifts.ShiftResponse'
+                  type: array
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: List semua shift
+      tags:
+      - shifts
+    post:
+      consumes:
+      - application/json
+      description: Admin creates shift
+      parameters:
+      - description: Shift creation payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/shifts.CreateShiftRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Shift created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/shifts.ShiftResponse'
+              type: object
+        "400":
+          description: Invalid request payload
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: Admin creates shift
+      tags:
+      - shifts
+  /shifts/{id}:
+    delete:
+      description: Menghapus shift berdasarkan ID
+      parameters:
+      - description: Shift ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Shift deleted successfully
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "400":
+          description: Invalid shift ID
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "404":
+          description: Shift not found
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: Hapus shift
+      tags:
+      - shifts
+    get:
+      description: Mendapatkan detail shift berdasarkan ID
+      parameters:
+      - description: Shift ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved shift detail
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/shifts.ShiftResponse'
+              type: object
+        "400":
+          description: Invalid shift ID
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "404":
+          description: Shift not found
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: Detail shift
+      tags:
+      - shifts
+    put:
+      consumes:
+      - application/json
+      description: Mengedit shift berdasarkan ID
+      parameters:
+      - description: Shift ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Shift update payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/shifts.UpdateShiftRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Shift updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/pkg.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/shifts.ShiftResponse'
+              type: object
+        "400":
+          description: Invalid request payload or shift ID
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "404":
+          description: Shift not found
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: Edit shift
+      tags:
+      - shifts
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user in the system
+      parameters:
+      - description: User information
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/users.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "400":
+          description: Invalid request payload
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/pkg.BaseResponse'
+      summary: Create a new user
+      tags:
+      - users
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and the JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

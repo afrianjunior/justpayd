@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS assignments;
+DROP TABLE IF EXISTS shift_requests;
+DROP TABLE IF EXISTS shifts;
+DROP TABLE IF EXISTS users;
